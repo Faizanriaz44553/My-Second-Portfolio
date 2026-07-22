@@ -222,7 +222,7 @@ const Home = () => {
 
                 <div className={`relative z-10 w-full opacity-90 transform transition-transform duration-500 ${
                   isHovering ? "scale-105" : "scale-100"
-                }`}>
+                }`}> 
                   <DotLottieReact {...lottieOptions} />
                 </div>
 

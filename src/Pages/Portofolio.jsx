@@ -362,7 +362,6 @@ export default function FullWidthTabs() {
                     data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}
                   >
                     <TechStackIcon TechStackIcon={stack.icon} Language={stack.language} />
-                    {console.log(stack.icon)}
                     
                   </div>
                 ))}
