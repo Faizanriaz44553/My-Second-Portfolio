@@ -3,6 +3,8 @@ import { Github, Linkedin, Mail, ExternalLink, Instagram, Sparkles } from "lucid
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
+import { collection, db, } from "../firebase"
+import { doc, getDoc } from "firebase/firestore"
 
 // Memoized Components
 const StatusBadge = memo(() => (
@@ -19,20 +21,20 @@ const StatusBadge = memo(() => (
   </div>
 ));
 
-const MainTitle = memo(() => (
+const MainTitle = memo(({data}) => (
   <div className="space-y-2" data-aos="fade-up" data-aos-delay="600">
     <h1 className="text-5xl sm:text-6xl md:text-6xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
       <span className="relative inline-block">
         <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
         <span className="relative bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-          Frontend
+          {data?.title1 || "Frontend"}
         </span>
       </span>
       <br />
       <span className="relative inline-block mt-2">
         <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
         <span className="relative bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent">
-          Developer
+          {data?.title2 || "Developer"}
         </span>
       </span>
     </h1>
@@ -77,8 +79,8 @@ const SocialLink = memo(({ icon: Icon, link }) => (
 const TYPING_SPEED = 100;
 const ERASING_SPEED = 50;
 const PAUSE_DURATION = 2000;
-const WORDS = ["Network & Telecom Student", "Tech Enthusiast"];
-const TECH_STACK = ["React", "Javascript", "Node.js", "Tailwind"];
+// const WORDS = ["Network & Telecom Student", "Tech Enthusiast"];
+// const TECH_STACK = ["React", "Javascript", "Node.js", "Tailwind"];
 const SOCIAL_LINKS = [
   { icon: Github, link: "https://github.com/Faizanriaz44553" },
   { icon: Linkedin, link: "https://www.linkedin.com/in/faizan-riaz-773550300?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
@@ -92,7 +94,25 @@ const Home = () => {
   const [charIndex, setCharIndex] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
+  const [data , setData] = useState(null)
+  const WORDS = data?.Features || ["Network & Telecom Student", "Tech Enthusiast"];
+  const TECH_STACK = data?.TechStack || ["React", "Javascript", "Node.js", "Tailwind"];
 
+  //data fetch
+  const fetchData = async() => {
+    try {
+         const docRef = doc(db, "header", "main");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setData(data)
+      }
+    } catch (error) {
+      console.log(error.message);
+      
+    }
+  }
   // Optimize AOS initialization
   useEffect(() => {
     const initAOS = () => {
@@ -112,6 +132,9 @@ const Home = () => {
     setIsLoaded(true);
     return () => setIsLoaded(false);
   }, []);
+  useEffect(() => {
+    fetchData()
+  } , [])
 
   // Optimize typing effect
   const handleTyping = useCallback(() => {
@@ -169,7 +192,7 @@ const Home = () => {
               data-aos-delay="200">
               <div className="space-y-4 sm:space-y-6">
                 <StatusBadge />
-                <MainTitle />
+                <MainTitle data={data} />
 
                 {/* Typing Effect */}
                 <div className="h-8 flex items-center" data-aos="fade-up" data-aos-delay="800">
@@ -183,7 +206,7 @@ const Home = () => {
                 <p className="text-base md:text-lg text-gray-400 max-w-xl leading-relaxed font-light"
                   data-aos="fade-up"
                   data-aos-delay="1000">
-                  Creating an Innovative, Functional, and User-Friendly Website for Digital Solutions
+                  {data?.Description}
                 </p>
 
                 {/* Tech Stack */}
