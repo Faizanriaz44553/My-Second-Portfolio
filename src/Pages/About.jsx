@@ -1,9 +1,13 @@
-import React, { useEffect, memo, useMemo } from "react"
+import React, { useEffect, memo, useMemo, useState } from "react"
 import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles, UserCheck } from "lucide-react"
 import AOS from 'aos'
 import 'aos/dist/aos.css'
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 // Memoized Components
+
+  
 const Header = memo(() => (
   <div className="text-center lg:mb-8 mb-2 px-[5%]">
     <div className="inline-block relative group">
@@ -27,7 +31,7 @@ const Header = memo(() => (
   </div>
 ));
 
-const ProfileImage = memo(() => (
+const ProfileImage = memo(({url}) => (
   <div className="flex justify-end items-center sm:p-12 sm:py-0 sm:pb-0 p-0 py-2 pb-2">
     <div 
       className="relative group" 
@@ -50,7 +54,7 @@ const ProfileImage = memo(() => (
           <div className="absolute inset-0 bg-gradient-to-t from-purple-500/20 via-transparent to-blue-500/20 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 hidden sm:block" />
           
           <img
-            src="/profile.png"
+            src={url}
             alt="Profile"
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-2"
             loading="lazy"
@@ -114,6 +118,7 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
 
 const AboutPage = () => {
   // Memoized calculations
+  const [AboutData , setAboutData] = useState(null)
   const { totalProjects, totalCertificates, YearExperience } = useMemo(() => {
     const storedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
     const storedCertificates = JSON.parse(localStorage.getItem("certificates") || "[]");
@@ -153,7 +158,18 @@ const AboutPage = () => {
       clearTimeout(resizeTimer);
     };
   }, []);
+  const getAboutData = async () => {
+    const docRef = doc(db, "about", "main");
+    const docSnap = await getDoc(docRef);
 
+    if (docSnap.exists()) {
+      setAboutData(docSnap.data());
+    }
+};
+useEffect(() => {
+    getAboutData()
+}, [])
+  console.log(AboutData);
   // Memoized stats data
   const statsData = useMemo(() => [
     {
@@ -205,7 +221,7 @@ const AboutPage = () => {
                 data-aos="fade-right"
                 data-aos-duration="1300"
               >
-                Muhammad Faizan Riaz
+                {AboutData?.name}
               </span>
             </h2>
             
@@ -214,11 +230,11 @@ const AboutPage = () => {
               data-aos="fade-right"
               data-aos-duration="1500"
             >
-             a Computer Network and Telecommunications Engineering student interested in Front-End development. I focus on creating engaging digital experiences and always strive to deliver the best solutions in every project.
+            {AboutData?.description}
             </p>
 
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">
-              <a href="https://drive.google.com/file/d/1w28FWuVGHDkj11K2pUxD1E2Kgn1wuozL/view?usp=sharing" className="w-full lg:w-auto">
+              <a href={AboutData?.resume} target="blank" className="w-full lg:w-auto">
               <button 
                 data-aos="fade-up"
                 data-aos-duration="800"
@@ -239,7 +255,7 @@ const AboutPage = () => {
             </div>
           </div>
 
-          <ProfileImage />
+          <ProfileImage url={AboutData?.imgURL} />
         </div>
 
         <a href="#Portofolio">
